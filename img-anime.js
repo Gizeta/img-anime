@@ -11,7 +11,7 @@ class ImgAnime extends HTMLElement {
         let maxWidth = 0;
         let maxHeight = 0;
 
-        let images = this.getElementsByTagName('img');
+        let images = Array.prototype.slice.call(this.getElementsByTagName('img'));
         for (let image of images) {
             if (maxWidth < image.width)
                 maxWidth = image.width;
