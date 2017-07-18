@@ -1,3 +1,4 @@
+const $$autoplay     = Symbol('$$autoplay');
 const $$canvas       = Symbol('$$canvas');
 const $$currentFrame = Symbol('$$currentFrame');
 const $$fps          = Symbol('$$fps');
@@ -8,7 +9,7 @@ const $$render       = Symbol('$$render');
 const $$startTime    = Symbol('$$startTime');
 
 class ImgAnime extends HTMLElement {
-    static get observedAttributes() { return ['fps']; }
+    static get observedAttributes() { return ['fps', 'autoplay']; }
 
     constructor() {
         super();
@@ -45,10 +46,12 @@ class ImgAnime extends HTMLElement {
         this[$$handler] = null;
         this[$$currentFrame] = 0;
         this[$$fps] = 30;
+        this[$$autoplay] = false;
     }
 
     connectedCallback() {
-        this.play();
+        if (this[$$autoplay])
+            this.play();
     }
 
     disconnectedCallback() {
@@ -59,6 +62,8 @@ class ImgAnime extends HTMLElement {
     attributeChangedCallback(attr, oldValue, newValue) {
         if (attr === 'fps') {
             this.fps = +newValue;
+        } else if (attr === 'autoplay') {
+            this[$$autoplay] = newValue === 'true';
         }
     }
 

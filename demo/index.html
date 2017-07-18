@@ -15,7 +15,7 @@
     </script>
 </head>
 <body>
-    <img-anime fps="43">
+    <img-anime fps="43" autoplay="true">
         <img src="images/1.png" data-span="4" />
         <img src="images/2.png" data-span="3" />
         <img src="images/3.png" data-span="4" />
@@ -31,7 +31,7 @@
     <button onclick="javascript:document.getElementsByTagName('img-anime')[0].play();">play</button>
     <button onclick="javascript:document.getElementsByTagName('img-anime')[0].pause();">pause</button>
     <button onclick="javascript:document.getElementsByTagName('img-anime')[0].seek(6);">seek(6)</button>
-    <button onclick="javascript:document.getElementsByTagName('img-anime')[0].setAttribute('fps','86');">fps=86</button>
-    <button onclick="javascript:document.getElementsByTagName('img-anime')[0].setAttribute('fps','21');">fps=21</button>
+    <button onclick="javascript:document.getElementsByTagName('img-anime')[0].fps=86;">fps=86</button>
+    <button onclick="javascript:document.getElementsByTagName('img-anime')[0].fps=21;">fps=21</button>
 </body>
 </html>
