@@ -1,3 +1,12 @@
+const $$canvas       = Symbol('$$canvas');
+const $$currentFrame = Symbol('$$currentFrame');
+const $$fps          = Symbol('$$fps');
+const $$frameCount   = Symbol('$$frameCount');
+const $$frames       = Symbol('$$frames');
+const $$handler      = Symbol('$$handler');
+const $$render       = Symbol('$$render');
+const $$startTime    = Symbol('$$startTime');
+
 class ImgAnime extends HTMLElement {
     static get observedAttributes() { return ['fps']; }
 
@@ -6,7 +15,7 @@ class ImgAnime extends HTMLElement {
 
         let shadow = this.attachShadow({mode: 'open'});
 
-        this.frames = [];
+        this[$$frames] = [];
         
         let maxWidth = 0;
         let maxHeight = 0;
@@ -18,24 +27,24 @@ class ImgAnime extends HTMLElement {
             if (maxHeight < image.height)
                 maxHeight = image.height;
 
-            this.frames.push(image);
+            this[$$frames].push(image);
             if (+image.dataset.span > 0) {
-                Array.prototype.push.apply(this.frames, new Array(+image.dataset.span));
+                Array.prototype.push.apply(this[$$frames], new Array(+image.dataset.span));
             }
             
             image.style.display = 'none';
         }
-        this._frameCount = this.frames.length;
+        this[$$frameCount] = this[$$frames].length;
 
         let canvas = document.createElement('canvas');
         canvas.width = maxWidth;
         canvas.height = maxHeight;
         shadow.appendChild(canvas);
-        this._canvas = canvas;
+        this[$$canvas] = canvas;
 
-        this._handler = null;
-        this._currentFrame = 0;
-        this._fps = 30;
+        this[$$handler] = null;
+        this[$$currentFrame] = 0;
+        this[$$fps] = 30;
     }
 
     connectedCallback() {
@@ -49,47 +58,52 @@ class ImgAnime extends HTMLElement {
 
     attributeChangedCallback(attr, oldValue, newValue) {
         if (attr === 'fps') {
-            this._fps = +newValue;
-            this.seek(this._currentFrame);
+            this.fps = +newValue;
         }
     }
 
     play() {
-        if (!this._handler) {
-            this._startTime = new Date().getTime() - this._currentFrame * 1000 / this._fps;
-            this._handler = requestAnimationFrame(this._render.bind(this));
+        if (!this[$$handler]) {
+            this[$$startTime] = new Date().getTime() - this[$$currentFrame] * 1000 / this[$$fps];
+            this[$$handler] = requestAnimationFrame(this[$$render].bind(this));
         }
     }
 
     pause() {
-        if (this._handler) {
-            cancelAnimationFrame(this._handler);
-            this._handler = null;
+        if (this[$$handler]) {
+            cancelAnimationFrame(this[$$handler]);
+            this[$$handler] = null;
         }
     }
 
     reset() {
-        this._currentFrame = 0;
+        this[$$currentFrame] = 0;
         this.seek(0);
     }
 
     seek(frame) {
-        this._currentFrame = frame % this._frameCount;
-        this._startTime = new Date().getTime() - frame * 1000 / this._fps;
+        this[$$currentFrame] = frame % this[$$frameCount];
+        this[$$startTime] = new Date().getTime() - frame * 1000 / this[$$fps];
     }
 
-    _render() {
-        let timeDelta = new Date().getTime() - this._startTime;
-        let _currentFrame = timeDelta * this._fps / 1000 % this._frameCount | 0;
+    get fps() { return this[$$fps]; }
+    set fps(value) {
+        this[$$fps] = value;
+        this.seek(this[$$currentFrame]);
+    }
 
-        if (this._currentFrame !== _currentFrame && this.frames[_currentFrame] != null) {
-            this._currentFrame = _currentFrame;
-            let ctx = this._canvas.getContext('2d');
-            ctx.clearRect(0, 0, this._canvas.width, this._canvas.height);
-            ctx.drawImage(this.frames[_currentFrame], 0, 0);
+    [$$render]() {
+        let timeDelta = new Date().getTime() - this[$$startTime];
+        let currentFrame = timeDelta * this[$$fps] / 1000 % this[$$frameCount] | 0;
+
+        if (this[$$currentFrame] !== currentFrame && this[$$frames][currentFrame] != null) {
+            this[$$currentFrame] = currentFrame;
+            let ctx = this[$$canvas].getContext('2d');
+            ctx.clearRect(0, 0, this[$$canvas].width, this[$$canvas].height);
+            ctx.drawImage(this[$$frames][currentFrame], 0, 0);
         }
         
-        this._handler = requestAnimationFrame(this._render.bind(this));
+        this[$$handler] = requestAnimationFrame(this[$$render].bind(this));
     }
 }
 
