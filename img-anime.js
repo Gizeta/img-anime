@@ -70,6 +70,7 @@ class ImgAnime extends HTMLElement {
 
     reset() {
         this._currentFrame = 0;
+        this.seek(0);
     }
 
     seek(frame) {
